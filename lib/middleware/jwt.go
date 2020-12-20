@@ -17,6 +17,16 @@ var MySigningKey []byte
 // JWTExpireTime ...
 var JWTExpireTime int
 
+// MyCustomClaims ...
+type MyCustomClaims struct {
+	ID    uint   `json:"Id"`
+	Email string `json:"Email"`
+	jwt.StandardClaims
+}
+
+// UserID - Access details
+var UserID uint
+
 // JWT ...
 func JWT() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -33,7 +43,7 @@ func JWT() gin.HandlerFunc {
 			return
 		}
 
-		token, err := jwt.Parse(vals[1], validateJWT)
+		token, err := jwt.ParseWithClaims(vals[1], &MyCustomClaims{}, validateJWT)
 
 		if err != nil {
 			log.Println("error parsing JWT", err)
@@ -41,8 +51,9 @@ func JWT() gin.HandlerFunc {
 			return
 		}
 
-		if claims, ok := token.Claims.(MyCustomClaims); ok && token.Valid {
+		if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
 			fmt.Println(claims.ID, claims.Email)
+			UserID = claims.ID
 		}
 	}
 }
@@ -55,13 +66,6 @@ func validateJWT(token *jwt.Token) (interface{}, error) {
 		return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 	}
 	return MySigningKey, nil
-}
-
-// MyCustomClaims ...
-type MyCustomClaims struct {
-	ID    uint   `json:"Id"`
-	Email string `json:"Email"`
-	jwt.StandardClaims
 }
 
 // GetJWT ...
