@@ -1,12 +1,16 @@
 package model
 
 import (
-	"github.com/jinzhu/gorm"
+	"time"
 )
 
 // Post model - `posts` table
 type Post struct {
-	gorm.Model
-	Title string `json:"Title"`
-	Body  string `json:"Body"`
+	PostID    uint `gorm:"primary_key"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time `sql:"index" json:"-"`
+	Title     string     `json:"Title,omitempty"`
+	Body      string     `json:"Body,omitempty"`
+	IDUser    uint       `json:"-"`
 }
